@@ -8,6 +8,25 @@ const {defineStore} = Pinia
 	 2. actions : 사용자 요청 처리 =>: springBoot와 연동 
 	 3. getters : computed 
 	    | range / 1,000
+		
+     Pinia store 
+	 ------------------
+	  state 
+	    |- list:[]
+		|- curpage ...
+		
+	  getters ========== 없는 경우도 있다 
+	    |- range
+	 
+	  actions 
+	    |- foodListData
+		|- move
+	 ------------------
+	        |
+		   this (Store전체)
+     range:(state) => getters에서는 state부분만 받아서 사용 
+	   | => this사용도 가능 
+	  
 */
 const initialState=()=>({
 	list:[],
