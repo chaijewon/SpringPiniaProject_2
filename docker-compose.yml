@@ -2,7 +2,7 @@ version: "3.8"
 services:
   app:
    build: .
-   container_name: pinia-app
+   container_name: chaijewon/pinia-app:latest
    ports:
      - "9090:9090"
    env_file:
