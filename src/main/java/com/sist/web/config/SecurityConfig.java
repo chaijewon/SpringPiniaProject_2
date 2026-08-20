@@ -20,9 +20,10 @@ import com.sist.web.security.LoginSuccessHandler;
 
 import lombok.RequiredArgsConstructor;
 
-@Configuration
-@EnableWebSecurity
-@RequiredArgsConstructor
+@Configuration // xml => 자바 (설정을 쉽게) => 보안  
+@EnableWebSecurity // Security => 인터셉트 
+@RequiredArgsConstructor // lombok => 생성자를 통해 @Autowired (자동 주입)
+// => 객체 => final
 /*
  *   1. Spring Security 
  *      = 보안을 담당하는 프레임워크 
@@ -60,12 +61,68 @@ import lombok.RequiredArgsConstructor;
  *         /board => permitAll
  *         /member => permitAll
  */
+/*
+ *    1. Authentication (인증) => 로그인 / 사용자 확인 
+ *    2. Authorization (인가) => 권한 확인 
+ *    
+ *    동작 (실행 순서)
+ *    사용자 
+ *      /member/login 
+ *          |
+ *      /member/login_process
+ *      ----------------------
+ *          |
+ *       Security FilterChain
+ *          |
+ *          UsernamePasswordAuthenticationFilter
+ *             => .usernameParameter("userid")
+ *                                   --------- <input type=text name="">
+ *                 => String username=request.getParameter("userid");
+	              .passwordParameter("userpwd")
+	               => 암호화된 비밀번호 / 비밀번호 비교
+	                     |              |
+	                     ---------------- > match encoder() 
+	                                          |      |
+	                                          --------
+	         |
+	      AuthenticationManager
+	         |
+	      AuthenticationProvider 
+	         |
+	      JdbcUserDetailsManager
+	         | DB 조회
+	           springmember / authority
+	         |
+	      UserDetails 생성 
+	         |
+	      BCryptPasswordEncoder
+	         | 비밀번호 비교 
+	      인증 성공 
+	         |
+	    -------------------
+	    |                 |
+	   성공               실패
+	                     LoginFailHandler 
+	   LoginSuccessHandler
+	          |
+	       SecurityContext
+	          |
+	       Session에 저장 
+	          |
+	      사용자 인증 완료
+	   /member/login_process 
+	   ---------------------- Controller 처리가 
+	             아니라 SecurityContext 인터셉트를 해서 처리
+ */
 public class SecurityConfig {
    private final LoginSuccessHandler loginSuccessHandler;
    private final LoginFailHandler  loginFailHandler;
    private final DataSource dataSource;
    
    // 접근 권한 => SecurityFilterChain
+   /*
+    *   HTTP요청이 있는 경우 Spring Security가 어떻게 처리 할지 지시 (설정)
+    */
    @Bean
    public SecurityFilterChain filterChain(HttpSecurity http)
    throws Exception
@@ -81,16 +138,75 @@ public class SecurityConfig {
 	    */
 	   http
 	    .csrf(csrf-> csrf.disable())
+	    // 접근 권한 설정 (URL)
 	    .authorizeHttpRequests(auth-> auth
 	          .requestMatchers("/","/member/**").permitAll()
+	          // 로그인 없이 접근 가능 
 	          .requestMatchers("/admin/**").hasRole("ADMIN")
+	          // ADMIN권한이 있는 사람만 접근이 가능 
 	          .anyRequest().permitAll()
+	          //.anyRequest().authenticated()
+	          // 지정이 안된 URL 주소 
+	          // /comment/** => authenticated()
 	    )
+	    // 로그인 설정 => login_ok
+	   
 	    .formLogin(form -> form 
 	          .loginPage("/member/login")
+	          //로그인 화면창 설정 => 설정이 없는 경우 default login
 	          .loginProcessingUrl("/member/login_process")
+	          // 가장 중요 부분 
+	          // 로그인 처리를 담당하는 URL => 가장 => Security에서 인터셉트가 가능
+	          // Controller에서 처리하는 것이 아니다 / SecurityFilter로 처리
+	          /*
+	           *   Security 처리 
+	           *   개발자 처리 => Controller / RestController
+	           */
 	          .usernameParameter("userid")
 	          .passwordParameter("userpwd")
+	          // => 로그인 처리를 위해서 id,pwd를 전송
+	          // => id = username , pwd => password
+	          /*
+	           *   UsernamePasswordAuthenticationFilter
+	           *   => String username=request.getParameter("userid");
+	           *   => String password=request.getParameter("userpwd");
+	           *   => 인증 객체로 전송 
+	           *      Authentication
+	           *        |- username=hong
+	           *        |- password=1234
+	           *   => AuthenticationManager
+	           *      => authenticationManager() 메소드 호출
+	           *          |
+	           *         .userDetailsService(jdbcUserDetailsService())
+	           *                             | 데이터베이스 검색 
+	           *                             | SQL
+	           *             | - 사용자 정보 => UserDetailsService
+	                     .passwordEncoder(passwordEncoder());
+	                         | - 비밀번호 비교 => PasswordEncoder
+	                  => UserDetails에 정보 저장 
+	                     --------------------- Session형식 => Principal
+	                     
+	                  인증 성공 
+	                    |
+	                  userid 존재 
+	                    |
+	                  UserDetails생성 
+	                    |
+	                  권한 확인 
+	                    |
+	                  비밀번호 확인 
+	                     |
+	                   인증 성공 / 인증 실패
+	                   
+	                 ==> 
+	                   SecuirtyContext
+	                       |
+	                        Authentication 
+	                          | - Principal (UserDetails)
+	                          | - authorities
+	                          | - authenticated = true 
+	                
+	           */
 	          .defaultSuccessUrl("/",false)
 	          .successHandler(loginSuccessHandler)
 	          .failureHandler(loginFailHandler)
