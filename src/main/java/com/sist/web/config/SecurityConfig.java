@@ -212,13 +212,39 @@ public class SecurityConfig {
 	          .failureHandler(loginFailHandler)
 	          .permitAll() 
 	    )
+	    // 자동 로그인 
 	    .rememberMe(remember-> remember
 	         .key("my-secret-key")
 	         .rememberMeParameter("remember-me")
 	         .tokenValiditySeconds(60*60*24)
+	         // 저장 기간 : 1일 
 	         .tokenRepository(persistentTokenRepository())
+	         // persistent_logins 테이블에 저장 
+	         /*
+	          *   로그인 
+	          *     |
+	          *   remember-me 체크 => true 
+	          *     |
+	          *   토큰 생성 => 구분자 
+	          *     |
+	          *   JdbcTokenRepositoryImpl 
+	          *     |
+	          *    DB 저장 
+	          *    ---- persistent_logins
+	          *         username / series / token / last_used
+	          */
 	    )
-	    
+	    /*
+	     *    /member/logout 
+	     *        |
+	     *    Spring Security LogoutFilter
+	     *        |
+	     *    SecurityContext 제거
+	     *        |
+	     *      Session 제거 
+	     *        |
+	     *      Cookie 삭제
+	     */
 	    .logout(logout -> logout 
 	          .logoutUrl("/member/logout")
 	          .logoutSuccessUrl("/")
@@ -302,3 +328,94 @@ public class SecurityConfig {
    }
    
 }
+/*
+ *     [사용자]
+ *       | POST => /member/login_procss
+ *     ------------------------------
+ *       Spring Security FilterChain 
+ *     ------------------------------
+ *              |
+ *     UsernamePasswordAuthenticationFilter
+ *              |  username
+ *              |  password
+ *                 .usernameParameter("userid")
+	               .passwordParameter("userpwd")
+	            |
+	     -------------------------
+	       AuthenticationManager
+	     -------------------------
+	            |
+	       AuthenticationProvider
+	            |
+	       JdbcUserDetailsManager  
+	            | DB 검색 
+	      ------------------------
+	      |                      |
+	    springmember           authority => username이 존재
+	    (기본 사용자 정보)         (권한 정보)
+	         |                    |
+	         ----------------------
+	                  |
+ *                 UserDetails
+ *                    |
+ *               BCrytPasswordEncoder
+ *                    |
+ *                 비밀번호 검증 
+ *                    |
+ *        -------------------------------
+ *        |                             |
+ *       성공                           실패
+ *        |                             |
+ *      LoginSeccessHandler         LoginFailHandler
+ *        |
+ *       SecurityContext 
+ *        |
+ *       Session에 저장 
+ *        |
+ *       인증 완료
+ *       
+ *       ------------------------------------
+ *       라이브러리 역할 
+ *       @EnableWebSecurity => Spring Security 활성화 
+ *                             => 사용하기 위해 
+ *       1. SecurityConfig : 보안 전체 설정을 담당 
+ *                           => 사용자 정의 
+ *       2. HttpSecurity : 로그인 / 로그아웃 /권한 / CSRF보안 설정 구성 
+ *       3. SecurityFilterChain : HTTP 요청에 대한 Spring Security 필처 처리 순서 정의
+ *       4. AuthenticationManager : 사용자의 인증 과정을 총괄 
+ *       5. AuthenticationProvider : 실제 사용자 인증을 수행하는 객체 
+ *             => login_ok
+ *       6. UserDetailsService : 로그인한 사용자의 정보를 조회 
+ *       7. JdbcUserDetailsManager
+ *             => DB에서 사용자/권한 정보를 조회해서 
+ *                저장하는 역할 : SQL 사용 
+ *       8. UserDetails : 사용자 정보가 저장된 객체 
+ *       9. BCryptPasswordEncoder : 비밀번호 암호화 처리 
+ *       10. JdbcTokenRepositoryImpl : 자동 로그인시 사용자 구분 토큰을 저장하는 역할 
+ *       11. LoginSuccessHandler : 로그인 성공시 처리 
+ *       12. LoginFailHandler : 로그인 실패시 처리 
+ *       13. SecurityContext : 인증 정보를 보관하는 클래스
+ *       14. formLogin : 로그인시 처리 방법 설정 
+ *       15. rememberMe: 자동로그인 설정 
+ *       16. logout : => session해제 / cookie 삭제 
+ *       
+ *       Filter - Manager = UserDetailsService - DB
+ *              - PasswordEncoder 
+ *              - Authentication 
+ *              - SecurityContext
+ *        => DB 
+ *           회원정보 / 권한 
+ *              |
+ *           Authentication 
+ *              |-로그인된 사용자 정보
+ *           SecurityContext 
+ *              | -  Authentication 보관 
+ *           Session 
+ *              로그인 상태 유지 
+ *              
+ *       ---------------------------------
+ *       인증 AuthenticationManager
+ *       성공 Authentication -> SecurityContext
+ *       유지 Session (remember-me)
+ *                     | cookie + DB
+*/
