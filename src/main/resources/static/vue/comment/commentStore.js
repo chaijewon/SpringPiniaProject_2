@@ -40,7 +40,10 @@ const useCommentStore=defineStore('comment',{
 		count:0,
 		sessionId:'',
 		fno:0,
-		msg:''
+		msg:'',
+		upReplyNo:null,
+		updateMsg:{},
+		
 	}),
 	
 	actions:{
@@ -77,10 +80,24 @@ const useCommentStore=defineStore('comment',{
 		 this.count=res.data.count
 		 this.msg=''
 	   },
-	   /*toggleReply(no){
-		 this.replyNo=this.replyNo===no?null:no
-		 
-	   }*/
+	   toggleUpdate(no,msg){
+		 this.upReplyNo=this.upReplyNo===no?null:no
+		 this.updateMsg[no]=msg
+	   },
+	   async commentUpdate(no){
+		 const res=await api.put('/comment/update_vue',{
+			no:no,
+			fno:this.fno,
+			page:this.curpage,
+			msg:this.updateMsg[no]
+		 })
+		 console.log(res.data) // res.data => map
+		 this.rList=res.data.rList
+		 this.curpage=res.data.curpage
+		 this.totalpage=res.data.totalpage
+		 this.count=res.data.count
+		 this.upReplyNo=null
+	   },
 	   async commentDelete(no){
 		         const res=await api.delete('/comment/delete_vue',{
 				   params:{

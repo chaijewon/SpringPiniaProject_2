@@ -149,7 +149,9 @@ console.log("ID="+SESSION_ID)
                     ◑{{rvo.name}}({{rvo.dbday}})
                    </td>
                    <td width=20% class="text-right">
-                    <a class="a-link btn btn-xs btn-info" v-if="rvo.id===store.sessionId">수정</a>
+                    <a class="a-link btn btn-xs btn-info" v-if="rvo.id===store.sessionId"
+                      @click="store.toggleUpdate(rvo.no,rvo.msg)"
+                    >{{store.upReplyNo===rvo.no?'취소':'수정'}}</a>
                     <a class="a-link btn btn-xs btn-warning" v-if="rvo.id===store.sessionId"
                       @click="store.commentDelete(rvo.no)"
                     >삭제</a>
@@ -159,6 +161,18 @@ console.log("ID="+SESSION_ID)
                    <td colspan="2" style="white-space: pre-wrap;">
                      {{rvo.msg}}
                    </td>
+                 </tr>
+                 <tr v-if="store.upReplyNo===rvo.no">
+                   <td colspan="2">
+                     <textarea rows="4" cols="70" style="float: left"
+	                   v-model="store.updateMsg[rvo.no]"
+	                  ></textarea>
+	                  <button type=button class="btn-primary"
+	                    @click="store.commentUpdate(rvo.no)"
+	                    style="width:100px;height: 89px;float: left">
+	                    수정
+	                  </button>
+	               </td>
                  </tr>
                </tbody>
              </table>
