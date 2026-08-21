@@ -25,4 +25,8 @@
       SYSDATE
     )     
   </insert>
+  <delete id="commentDelete" parameterType="int">
+    DELETE FROM piniaComment 
+    WHERE no=#{no}
+  </delete>
 </mapper>

@@ -76,7 +76,15 @@ const useCommentStore=defineStore('comment',{
 		 this.totalpage=res.data.totalpage
 		 this.count=res.data.count
 		 this.msg=''
+	   },
+	   /*toggleReply(no){
+		 this.replyNo=this.replyNo===no?null:no
+		 
+	   }*/
+	   async commentDelete(){
+		  
 	   }
+	   // 수정 
 	}
 })
 

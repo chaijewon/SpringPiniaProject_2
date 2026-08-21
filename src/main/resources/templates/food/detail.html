@@ -135,7 +135,7 @@ console.log("ID="+SESSION_ID)
           </tr>
         </tbody>
       </table>
-      <table class="table" v-if="store.count!==0">
+      <table class="table" v-if="store.count>0">
         <tbody>
           <tr>
             <td>
@@ -157,10 +157,36 @@ console.log("ID="+SESSION_ID)
                  </tr>
                </tbody>
              </table>
+             <table class="table">
+               <tbody>
+                 <tr>
+                   <td class="text-center">
+                    <button type=button class="btn-sm btn-primary">이전</button>
+                    {{store.curpage}} page / {{store.totalpage}} pages
+                    <button type=button class="btn-sm btn-primary">다음</button>
+                   </td>
+                 </tr>
+               </tbody>
+             </table>
+             
             </td>
           </tr>
         </tbody>
       </table>
+      <table class="table" sec:authorize="isAuthenticated()">
+               <tbody>
+                <tr>
+                 <td class="text-center">
+                  <textarea rows="4" cols="70" style="float: left"
+                   ref="msgRef" v-model="store.msg"
+                  ></textarea>
+                  <button type=button class="btn-primary"
+                    @click="store.commentInsert(msgRef)"
+                    style="width:100px;height: 89px;float: left">댓글</button>
+                 </td>
+                </tr>
+               </tbody>
+             </table>
     </div>
   </div>
   <script>
