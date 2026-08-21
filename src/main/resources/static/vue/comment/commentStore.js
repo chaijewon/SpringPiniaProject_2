@@ -112,6 +112,10 @@ const useCommentStore=defineStore('comment',{
 				 this.curpage=res.data.curpage
 				 this.totalpage=res.data.totalpage
 				 this.count=res.data.count
+	   },
+	   move(page){
+		this.curpage=page
+		this.commentListData(this.fno)
 	   }
 	   // 수정 
 	}
