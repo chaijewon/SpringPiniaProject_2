@@ -81,8 +81,20 @@ const useCommentStore=defineStore('comment',{
 		 this.replyNo=this.replyNo===no?null:no
 		 
 	   }*/
-	   async commentDelete(){
-		  
+	   async commentDelete(no){
+		         const res=await api.delete('/comment/delete_vue',{
+				   params:{
+					 page:this.curpage,
+					 fno:this.fno,
+					 no:no
+				   }
+					
+				 })
+				 console.log(res.data) // res.data => map
+				 this.rList=res.data.rList
+				 this.curpage=res.data.curpage
+				 this.totalpage=res.data.totalpage
+				 this.count=res.data.count
 	   }
 	   // 수정 
 	}
