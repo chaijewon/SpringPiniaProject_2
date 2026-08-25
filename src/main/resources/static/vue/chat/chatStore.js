@@ -109,7 +109,7 @@ const useChatStore = defineStore('chat', {
                             const users =
                                 JSON.parse(msg.body)
 
-                            //this.users = users
+                               this.users = 
                                 users.filter(
                                     u =>
                                         u !== this.loginUser
