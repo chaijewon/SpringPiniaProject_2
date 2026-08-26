@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
@@ -51,6 +54,23 @@ h3 {
           </tr>
         </tbody>
       </table>
+    </div>
+    <div class="row" style="margin-top: 20px">
+      <h3>댓글</h3>
+           <table class="table" sec:authorize="isAuthenticated()">
+               <tbody>
+                <tr>
+                 <td class="text-center">
+                  <textarea rows="4" cols="70" style="float: left"
+                  
+                  ></textarea>
+                  <button type=button class="btn-primary"
+                    
+                    style="width:100px;height: 89px;float: left">댓글</button>
+                 </td>
+                </tr>
+               </tbody>
+             </table>
     </div>
   </div>
 </body>
