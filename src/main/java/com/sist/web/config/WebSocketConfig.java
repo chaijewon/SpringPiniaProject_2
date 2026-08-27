@@ -14,26 +14,34 @@ public class WebSocketConfig
     @Override
     public void configureMessageBroker(
             MessageBrokerRegistry registry) {
-
+        // /topic => 전체 메세지 => /all 
+    	// /queue => 개인 메세지 => /my
+    	// => 회원가입 / 예약 완료 / 결제 완료 / 댓글 
         registry.enableSimpleBroker(
                 "/topic",
-                "/queue"
+                "/queue",
+                "/sub"
         );
-
+        // 클라이언트 => 서버 요청 
+        // /app/chat/public => 전체 채팅 
+        // /app/chat/private => 1:1 
+        // 생략하고 인식 
         registry.setApplicationDestinationPrefixes(
-                "/app"
+                "/app",
+                "/pub"
         );
-
+        // /user/queue/chat
         registry.setUserDestinationPrefix(
                 "/user"
         );
     }
-
+    // websocket 연결 주소 지정 
     @Override
     public void registerStompEndpoints(
             StompEndpointRegistry registry) {
 
         registry.addEndpoint("/chat-ws")
+                //모든 사람이 접근이 가능 
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }

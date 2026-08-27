@@ -242,9 +242,9 @@
 <script src="/vue/chat/chatStore.js"></script>
 
 <script>
-
+    // Pinia
     const { createPinia } = Pinia
-
+    // Vue 
     const {
         ref,
         createApp,
@@ -252,25 +252,25 @@
     } = Vue
 
     const app = createApp({
-
-        setup() {
-
+         // 한번에 모아서 소스 코딩 
+         setup() {
+            // PiniaStore 가지고 온다 
             const store = useChatStore()
-
+            // 스크롤바 , 화면 (전체 => 1:1)
             const chatBody = ref(null)
-
+            // onload => 화면이 생성된 다음 실행 
             onMounted(() => {
-
+                // 로그인한 사람의 ID
                 store.loginUser =
                     LOGIN_USER
-
+                // 채팅창 UI
                 store.chatBodyEl =
                     chatBody.value
-
+                // WebSocket 연결 
                 store.connect()
 
             })
-
+            // HTML에서 사용이 가능하게 
             return {
 
                 store,
@@ -282,9 +282,9 @@
         }
 
     })
-
+    // Pinia등록 
     app.use(createPinia())
-
+    // 제어하는 HTML 영역 <template>
     app.mount('#app')
 
 </script>
