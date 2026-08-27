@@ -1,7 +1,7 @@
-pipeline{
-	stages{
-		stage('Git Connection Check'){
-			steps{
+pipeline {
+	stages {
+		stage('Git Connection Check') {
+			steps {
 				echo "=============="
 				echo "Git 연결 확인"
 				echo "=============="
